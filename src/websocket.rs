@@ -9,11 +9,12 @@ pub struct Server {
 
 impl Handler for Server {
     fn on_open(&mut self, handshake: Handshake) -> Result<()> {
-        let connection = handshake;
-        println!("New WebSocket connection from {}", connection.request.client_addr().ok().unwrap().unwrap());
+        // let connection = handshake;
+        // println!("New WebSocket connection from {}", connection.request.client_addr().ok().unwrap().unwrap());
 
         // Save the new connection to the list of connections
         self.connections.lock().unwrap().push(self.server_sender.clone());
+
 
         Ok(())
     }
@@ -34,7 +35,7 @@ impl Handler for Server {
     }
 }
 
-pub async fn open_ws(url: &str, port: &str, connections: &Arc<Mutex<Vec<Sender>>>) {
+pub async fn open_ws(url: &str, port: &str, connections: Arc<Mutex<Vec<Sender>>>) {
 
     // let connections: Arc<Mutex<Vec<Sender>>> = Arc::new(Mutex::new(Vec::new()));
 

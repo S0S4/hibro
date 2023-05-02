@@ -8,7 +8,7 @@ fn main() {
 
     // open a web socket
     let connections: Arc<Mutex<Vec<Sender>>> = Arc::new(Mutex::new(Vec::new()));
-    tokio::runtime::Runtime::new().unwrap().block_on(websocket::open_ws("0.0.0.0", "4444", &connections));
+    tokio::runtime::Runtime::new().unwrap().spawn(websocket::open_ws("0.0.0.0", "4444", connections.clone()));
 
     loop {
         print!("command: ");
