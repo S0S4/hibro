@@ -1,18 +1,50 @@
 // use ws::{listen, connect, CloseCode};
-use ws::listen;
+use ws::{listen, CloseCode, Handler, Handshake, Message, Result, Sender};
+use std::sync::{Arc, Mutex};
 
-pub fn open_ws(url: &str, port: &str) {
-    // Listen on an address and call the closure for each connection
-    if let Err(error) = listen(format!("{url}:{port}"), |out| {
-        // The handler needs to take ownership of out, so we use move
-        move |msg| {
-            println!("Server got message '{}'. ", msg);
-            out.send(msg)
-        }
-    }) {
-        // Inform the user of failure
-        println!("Failed to create WebSocket due to {:?}", error);
+pub struct Server {
+    connections: Arc<Mutex<Vec<Sender>>>,
+    server_sender: Sender,
+}
+
+impl Handler for Server {
+    fn on_open(&mut self, handshake: Handshake) -> Result<()> {
+        let connection = handshake;
+        println!("New WebSocket connection from {}", connection.request.client_addr().ok().unwrap().unwrap());
+
+        // Save the new connection to the list of connections
+        self.connections.lock().unwrap().push(self.server_sender.clone());
+
+        Ok(())
     }
+
+    fn on_message(&mut self, message: Message) -> Result<()> {
+        let connections = self.connections.lock().unwrap();
+
+        // Send the message to each connected client
+        for connection in connections.iter() {
+            connection.send(message.clone())?;
+        }
+
+        Ok(())
+    }
+
+    fn on_close(&mut self, code: CloseCode, reason: &str) {
+        println!("WebSocket connection closed with code {:?} and reason '{}'", code, reason);
+    }
+}
+
+pub async fn open_ws(url: &str, port: &str, connections: &Arc<Mutex<Vec<Sender>>>) {
+
+    // let connections: Arc<Mutex<Vec<Sender>>> = Arc::new(Mutex::new(Vec::new()));
+
+    listen(format!("{url}:{port}"), |sender| {
+        Server {
+            connections: connections.clone(),
+            server_sender: sender,
+        }
+    }).unwrap();
+
 }
 
 // pub fn send_message(url: &str, port: &str, message: &str) {
