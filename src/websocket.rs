@@ -25,6 +25,7 @@ impl Handler for Server {
         // Send the message to each connected client
         for connection in connections.iter() {
             connection.send(message.clone())?;
+            connection.send("yes sir !")?;
         }
 
         Ok(())

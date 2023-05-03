@@ -4,11 +4,12 @@ use std::sync::{Arc, Mutex};
 use std::io::{stdin, stdout, Write};
 use ws::Sender;
 
-fn main() {
+#[tokio::main]
+async fn main() {
 
     // open a web socket
     let connections: Arc<Mutex<Vec<Sender>>> = Arc::new(Mutex::new(Vec::new()));
-    tokio::runtime::Runtime::new().unwrap().spawn(websocket::open_ws("0.0.0.0", "4444", connections.clone()));
+    tokio::task::spawn(websocket::open_ws("0.0.0.0", "4444", connections.clone()));
 
     loop {
         print!("command: ");
