@@ -1,14 +1,22 @@
 mod websocket;
 mod sync;
+
 use std::sync::{Arc, Mutex};
 use std::io::{stdin, stdout, Write};
-use ws::Sender;
 
 #[tokio::main]
 async fn main() {
+    test_sync();
+}
 
+fn test_sync() {
+    println!("there we go!");
+    tokio::task::spawn(sync::sync("/home/iruzo/dev/hibro/testingsync"));
+}
+
+fn test_websocket() {
     // open a web socket
-    let connections: Arc<Mutex<Vec<Sender>>> = Arc::new(Mutex::new(Vec::new()));
+    let connections: Arc<Mutex<Vec<websocket::connection::Connection>>> = Arc::new(Mutex::new(Vec::new()));
     tokio::task::spawn(websocket::open_ws("0.0.0.0", "4444", connections.clone()));
 
     loop {
@@ -21,7 +29,7 @@ async fn main() {
         if response == "connections" {
 
             for connection in connections.clone().lock().unwrap().iter() {
-                println!("{}", connection.connection_id());
+                println!("{} - {}", connection.sender.connection_id(), connection.ip);
             }
 
         } else if response.contains("send")  {
@@ -30,19 +38,12 @@ async fn main() {
             let connection_id = splitted_command.last().unwrap();
 
             for patata in connections.clone().lock().unwrap().iter() {
-                if patata.clone().connection_id() == connection_id.parse::<u32>().unwrap() {
-                   patata.clone().send("hello there !");
+                if patata.clone().sender.connection_id() == connection_id.parse::<u32>().unwrap() {
+                    let _ = patata.clone().sender.send("hello there !");
                 }
             }
 
         }
 
     }
-
-    // for connection in connections.clone().lock().unwrap().iter() {
-    //     connection.send("");
-    // }
-
-    // sync::sync("config_file_path")
-
 }

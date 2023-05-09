@@ -1,3 +1,4 @@
+use std::sync::{Arc, Mutex};
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 use tokio::task;
@@ -8,19 +9,11 @@ async fn clone_repo(url: &str, dir_path: &str) {
 
     let repo = match Repository::clone(url, dir_path) {
         Ok(repo) => repo,
-        Err(e) => panic!("failed to clone: {}", e),
+        Err(e) => return println!("{}", e.to_string()),
     };
 
-    // let output = std::process::Command::new("git")
-    //     .arg("clone")
-    //     .arg(url)
-    //     .arg(dir_path)
-    //     .output()
-    //     .expect("failed to execute process");
+    println!("Repository cloned to {:?}", repo.path());
 
-    // if !output.status.success() {
-    //     panic!("failed to clone repository {}", url);
-    // }
 }
 
 /// Example:
@@ -34,11 +27,13 @@ async fn clone_repo(url: &str, dir_path: &str) {
 ///
 /// tokio::runtime::Runtime::new().unwrap().block_on(clone_repos(&urls, &target_dir));
 /// ```
-async fn clone_repos(urls: &[String], dir_path: &str) {
+async fn clone_repos(urls: Arc<Mutex<Vec<String>>>, dir_path: &str) {
+    println!("clone repos...");
     let mut handles = Vec::new();
-    for url in urls {
+    for url in urls.lock().unwrap().iter() {
         let dir_path = dir_path.to_owned();
         let url = url.clone();
+        println!("trying to clone... {}", url);
         handles.push(task::spawn(async move {
             clone_repo(&url, &dir_path).await;
         }));
@@ -66,7 +61,10 @@ fn read_sync_lines(filename: &str) -> Vec<String> {
 }
 
 /// Sync repositories from the config file
-pub fn sync(config_file_path: &str) {
-    let sync_lines: Vec<String> = read_sync_lines(config_file_path);
-    tokio::runtime::Runtime::new().unwrap().block_on(clone_repos(&sync_lines[..], "sync_path"));
+pub async fn sync(config_file_path: &str) {
+    let sync_lines: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(read_sync_lines("/home/iruzo/dev/hibro/testingsync")));
+    for line in sync_lines.lock().unwrap().iter() {
+        println!("{}", line.clone());
+    }
+    tokio::task::spawn(clone_repos(sync_lines, "/home/iruzo/dev/hibro/testingboys")).await;
 }
