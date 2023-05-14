@@ -1,6 +1,8 @@
 mod websocket;
 mod sync;
 
+use std::thread;
+use core::time::Duration;
 use std::sync::{Arc, Mutex};
 use std::io::{stdin, stdout, Write};
 
@@ -12,6 +14,7 @@ async fn main() {
 fn test_sync() {
     println!("there we go!");
     tokio::task::spawn(sync::sync("/home/iruzo/dev/hibro/testingsync"));
+    thread::sleep(Duration::from_millis(5000))
 }
 
 fn test_websocket() {
