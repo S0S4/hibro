@@ -14,6 +14,13 @@ async fn clone_repo(url: String, dir_path: String) {
     let parts: Vec<&str> = url.split("/").collect();
     let user_repo_name = parts.get(parts.len() - 2).unwrap();
 
+    // create dir_path if it does not exist
+    if let Ok(metadata) = fs::metadata(&dir_path) {
+        if !metadata.is_dir() {
+            let _ = fs::create_dir_all(&dir_path);
+        }
+    }
+
     // creating the full path where the repository will be cloned
     let mut path = PathBuf::new();
     path.push(dir_path);
