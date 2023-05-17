@@ -9,11 +9,13 @@ use std::io::{stdin, stdout, Write};
 
 #[tokio::main]
 async fn main() {
-    test_path()
+
 }
 
 fn test_path() {
-    println!("{}", path::home());
+    println!("{}", path::config());
+    println!("{}", path::data());
+    println!("{}", path::sync());
 }
 
 fn test_sync() {

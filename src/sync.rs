@@ -88,5 +88,5 @@ pub async fn sync(config_file_path: &str) {
     for line in sync_lines.lock().unwrap().iter() {
         println!("{}", line.clone());
     }
-    tokio::spawn(clone_repos(sync_lines, "/home/iruzo/dev/hibro/testingboys"));
+    tokio::task::spawn(clone_repos(sync_lines, "/home/iruzo/dev/hibro/testingboys"));
 }
