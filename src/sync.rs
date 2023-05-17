@@ -44,17 +44,16 @@ async fn clone_repo(url: String, dir_path: String) {
 
 }
 
-/// Example:
+/// * **example**:
+///   ```
+///   let urls = vec![
+///       String::from("https://github.com/rust-lang/rust.git"),
+///       String::from("https://github.com/tensorflow/tensorflow.git"),
+///   ];
+///   let target_dir = "/home/a/";
 ///
-/// ```
-/// let urls = vec![
-///     String::from("https://github.com/rust-lang/rust.git"),
-///     String::from("https://github.com/tensorflow/tensorflow.git"),
-/// ];
-/// let target_dir = "/home/a/";
-///
-/// tokio::runtime::Runtime::new().unwrap().block_on(clone_repos(&urls, &target_dir));
-/// ```
+///   tokio::runtime::Runtime::new().unwrap().block_on(clone_repos(&urls, &target_dir));
+///   ```
 async fn clone_repos(urls: Arc<Mutex<Vec<String>>>, dir_path: &str) {
     println!("clone repos...");
     let mut tasks: Vec<tokio::task::JoinHandle<()>> = vec![];
