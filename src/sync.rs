@@ -54,7 +54,7 @@ async fn clone_repo(url: String, dir_path: String) {
 ///
 ///   tokio::runtime::Runtime::new().unwrap().block_on(clone_repos(&urls, &target_dir));
 ///   ```
-async fn clone_repos(urls: Arc<Mutex<Vec<String>>>, dir_path: &str) {
+async fn clone_repos(urls: Arc<Mutex<Vec<String>>>, dir_path: String) {
     println!("clone repos...");
     let mut tasks: Vec<tokio::task::JoinHandle<()>> = vec![];
     for url in urls.lock().unwrap().iter() {
@@ -81,11 +81,11 @@ fn read_sync_lines(filename: &str) -> Vec<String> {
     return sync_lines
 }
 
-/// Sync repositories from the config file
-pub async fn sync(config_file_path: &str) {
-    let sync_lines: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(read_sync_lines("/home/iruzo/dev/hibro/repos")));
+/// Sync repositories from the config file to the desired directory
+pub async fn sync(config_file_path: &str, sync_directory: &str) {
+    let sync_lines: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(read_sync_lines(config_file_path)));
     for line in sync_lines.lock().unwrap().iter() {
         println!("{}", line.clone());
     }
-    tokio::task::spawn(clone_repos(sync_lines, "/home/iruzo/dev/hibro/testingboys"));
+    tokio::task::spawn(clone_repos(sync_lines, sync_directory.to_owned()));
 }

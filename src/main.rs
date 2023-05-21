@@ -19,7 +19,7 @@ fn test_path() {
 }
 
 fn test_sync() {
-    tokio::task::spawn(sync::sync("/home/iruzo/dev/hibro/testingsync"));
+    tokio::task::spawn(sync::sync("/home/iruzo/dev/hibro/repos", "/home/iruzo/dev/hibro/testingboys"));
     thread::sleep(Duration::from_millis(5000))
 }
 
