@@ -6,6 +6,7 @@ use std::thread;
 use core::time::Duration;
 use std::sync::{Arc, Mutex};
 use std::io::{stdin, stdout, Write};
+use base64::{Engine as _, engine::general_purpose};
 
 #[tokio::main]
 async fn main() {
@@ -48,7 +49,7 @@ fn test_websocket() {
 
             for patata in connections.clone().lock().unwrap().iter() {
                 if patata.clone().sender.connection_id() == connection_id.parse::<u32>().unwrap() {
-                    let _ = patata.clone().sender.send("hello there !");
+                    let _ = patata.clone().sender.send(general_purpose::STANDARD.encode(b"hello world"));
                 }
             }
 
