@@ -23,7 +23,7 @@ fn home() -> String {
 
 /// Return path where configuration is stored
 /// * **return**: String
-pub fn config() -> String {
+fn config() -> String {
 
     let mut config_path = PathBuf::new();
     config_path.push(home().to_owned());
@@ -53,7 +53,7 @@ pub fn config() -> String {
 
 /// Return path where data will be stored
 /// * **return**: String
-pub fn data() -> String {
+fn data() -> String {
 
     let mut config_path = PathBuf::new();
     config_path.push(home().to_owned());
@@ -82,8 +82,18 @@ pub fn data() -> String {
 
 }
 
+/// Return config file path where users configuration is stored
+pub fn config_file() -> String {
+    let mut config_path = PathBuf::new();
+
+    config_path.push(config());
+    config_path.push("config");
+
+    return config_path.to_string_lossy().into_owned();
+
+}
+
 /// Return sync path where synced repos will be stored
-/// * **return**: String
 pub fn sync() -> String {
 
     let mut sync_path = PathBuf::new();

@@ -14,13 +14,12 @@ async fn main() {
 }
 
 fn test_path() {
-    println!("{}", path::config());
-    println!("{}", path::data());
+    println!("{}", path::config_file());
     println!("{}", path::sync());
 }
 
 fn test_sync() {
-    tokio::task::spawn(sync::sync("/home/iruzo/dev/hibro/repos", "/home/iruzo/dev/hibro/testingboys"));
+    tokio::task::spawn(sync::sync(path::config_file(), path::sync()));
     thread::sleep(Duration::from_millis(5000))
 }
 

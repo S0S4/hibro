@@ -82,8 +82,8 @@ fn read_sync_lines(filename: &str) -> Vec<String> {
 }
 
 /// Sync repositories from the config file to the desired directory
-pub async fn sync(config_file_path: &str, sync_directory: &str) {
-    let sync_lines: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(read_sync_lines(config_file_path)));
+pub async fn sync(config_file_path: String, sync_directory: String) {
+    let sync_lines: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(read_sync_lines(config_file_path.as_str())));
     for line in sync_lines.lock().unwrap().iter() {
         println!("{}", line.clone());
     }
