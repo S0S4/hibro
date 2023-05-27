@@ -6,16 +6,18 @@ use std::thread;
 use core::time::Duration;
 use std::sync::{Arc, Mutex};
 use std::io::{stdin, stdout, Write};
+use minify_js::{Session, TopLevelMode, minify};
 use base64::{Engine as _, engine::general_purpose};
 
 #[tokio::main]
 async fn main() {
-
+    test_websocket();
 }
 
 fn test_path() {
     println!("{}", path::config_file());
     println!("{}", path::sync());
+    aksljfhlaskjdfc
 }
 
 fn test_sync() {
@@ -46,9 +48,12 @@ fn test_websocket() {
             let splitted_command = response.split(" ");
             let connection_id = splitted_command.last().unwrap();
 
+            let session = Session::new();
+            let mut out = Vec::new();
             for patata in connections.clone().lock().unwrap().iter() {
                 if patata.clone().sender.connection_id() == connection_id.parse::<u32>().unwrap() {
-                    let _ = patata.clone().sender.send(general_purpose::STANDARD.encode(b"hello world"));
+                    minify(&session, TopLevelMode::Global, b"const main = () => { let my_first_variable = 1; };", &mut out).unwrap();
+                    let _ = patata.clone().sender.send(general_purpose::STANDARD.encode(out.as_slice()));
                 }
             }
 

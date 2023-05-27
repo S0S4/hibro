@@ -105,6 +105,18 @@ pub fn sync() -> String {
 
 }
 
+/// Return path to store connections data
+pub fn connections() -> String {
+
+    let mut sync_path = PathBuf::new();
+
+    sync_path.push(data());
+    sync_path.push("connections");
+
+    return sync_path.to_string_lossy().into_owned();
+
+}
+
 /// Return path where data from the current session will be stored
 /// * **return**: String
 pub fn runtime() -> String {

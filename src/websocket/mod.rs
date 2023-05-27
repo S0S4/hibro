@@ -1,6 +1,3 @@
-// #[path = "connection.rs"] mod connection;
-// use connection::Connection;
-
 pub mod connection;
 
 use ws::{listen, CloseCode, Handler, Handshake, Message, Result, Sender};
@@ -23,6 +20,7 @@ impl Handler for Server {
         Ok(())
     }
 
+    /// Handle messages that comes from the websocket connection
     fn on_message(&mut self, message: Message) -> Result<()> {
         let connections = self.connections.lock().unwrap();
 
@@ -46,6 +44,7 @@ impl Handler for Server {
     }
 }
 
+/// Open a websocket and manage every connection on the given list
 pub async fn open_ws(url: &str, port: &str, connections: Arc<Mutex<Vec<connection::Connection>>>) {
 
     listen(format!("{url}:{port}"), |sender| {
