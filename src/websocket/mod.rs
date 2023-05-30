@@ -1,4 +1,6 @@
 pub mod connection;
+pub mod path;
+pub mod data;
 
 use ws::{listen, CloseCode, Handler, Handshake, Message, Result, Sender};
 use std::sync::{Arc, Mutex};

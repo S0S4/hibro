@@ -1,6 +1,5 @@
 mod websocket;
 mod sync;
-mod path;
 
 use std::thread;
 use core::time::Duration;
@@ -15,13 +14,12 @@ async fn main() {
 }
 
 fn test_path() {
-    println!("{}", path::config_file());
-    println!("{}", path::sync());
-    aksljfhlaskjdfc
+    println!("{}", websocket::path::config_file());
+    println!("{}", websocket::path::sync());
 }
 
 fn test_sync() {
-    tokio::task::spawn(sync::sync(path::config_file(), path::sync()));
+    tokio::task::spawn(sync::sync(websocket::path::config_file(), websocket::path::sync()));
     thread::sleep(Duration::from_millis(5000))
 }
 
