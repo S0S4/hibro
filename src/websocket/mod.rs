@@ -11,7 +11,9 @@ pub struct Server {
 }
 
 impl Handler for Server {
+
     fn on_open(&mut self, handshake: Handshake) -> Result<()> {
+
         println!("New connection - IP: {}", Some(handshake.remote_addr()?).unwrap().unwrap());
 
         self.connections.lock().unwrap().push(connection::Connection{
@@ -20,29 +22,38 @@ impl Handler for Server {
         });
 
         Ok(())
+
     }
 
     /// Handle messages that comes from the websocket connection
     fn on_message(&mut self, message: Message) -> Result<()> {
+
         let connections = self.connections.lock().unwrap();
 
-        // Send the message to each connected client
-        for connection in connections.iter() {
-            connection.sender.send(message.clone())?;
-            connection.sender.send("yes sir !")?;
+        // find the current IP
+        for index in (0..connections.iter().len()).rev() {
+            if connections[index].sender.connection_id() == self.server_sender.connection_id() {
+                // save message on file
+                tokio::spawn(data::save(path::connections(), connections[index].ip.clone(), message.clone().to_string()));
+                break;
+            }
         }
 
         Ok(())
+
     }
 
     fn on_close(&mut self, code: CloseCode, reason: &str) {
+
         let mut connections = self.connections.lock().unwrap();
+
         for index in (0..connections.iter().len()).rev() {
             if connections[index].sender.connection_id() == self.server_sender.connection_id() {
                 connections.remove(index);
                 println!("WebSocket connection closed with code {:?} reason '{}', id {}", code, reason, index);
             }
         }
+
     }
 }
 
