@@ -3,16 +3,18 @@ use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 use std::fs::File;
 use std::io::{BufRead, BufReader};
-use tokio::task;
-use futures::future::join_all;
+use std::thread;
 use git2::Repository;
 
 /// Clone a repository into the given path
-async fn clone_repo(url: String, dir_path: String) {
+fn clone_repo(url: String, dir_path: String) {
 
     // split the url by "/" and getting the user name
     let parts: Vec<&str> = url.split("/").collect();
-    let user_repo_name = parts.get(parts.len() - 2).unwrap();
+    let mut usr_repo = parts.get(parts.len() - 2).unwrap().to_string();
+    usr_repo.push_str(".");
+    usr_repo.push_str(parts.get(parts.len() - 1).unwrap());
+    let user_repo_name = usr_repo.clone();
 
     // create dir_path if it does not exist
     if let Ok(metadata) = fs::metadata(&dir_path) {
@@ -52,16 +54,23 @@ async fn clone_repo(url: String, dir_path: String) {
 ///   ];
 ///   let target_dir = "/home/a/";
 ///
-///   tokio::runtime::Runtime::new().unwrap().block_on(clone_repos(&urls, &target_dir));
+///   thread::spawn(|| {clone_repos(&urls, &target_dir)});
 ///   ```
-async fn clone_repos(urls: Arc<Mutex<Vec<String>>>, dir_path: String) {
-    println!("clone repos...");
-    let mut tasks: Vec<tokio::task::JoinHandle<()>> = vec![];
+fn clone_repos(urls: Arc<Mutex<Vec<String>>>, dir_path: String) {
+    println!("cloning repos...");
+    let mut handles = Vec::new();
     for url in urls.lock().unwrap().iter() {
         println!("trying to clone... {}", &url);
-        tasks.push(task::spawn(clone_repo(url.clone(), dir_path.to_owned())));
+        let url_clone = url.clone();
+        let dir_path_clone = dir_path.to_owned().clone();
+        let handle = thread::spawn(|| {
+            clone_repo(url_clone, dir_path_clone);
+        });
+        handles.push(handle);
     }
-    join_all(tasks).await;
+    for handle in handles {
+        handle.join().expect("Failed to join git clone threads!");
+    }
 }
 
 /// Read lines from the given file and return the ones that starts with `sync=` without that part
@@ -82,10 +91,13 @@ fn read_sync_lines(filename: &str) -> Vec<String> {
 }
 
 /// Sync repositories from the config file to the desired directory
-pub async fn sync(config_file_path: String, sync_directory: String) {
+pub fn sync(config_file_path: String, sync_directory: String) {
     let sync_lines: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(read_sync_lines(config_file_path.as_str())));
     for line in sync_lines.lock().unwrap().iter() {
         println!("{}", line.clone());
     }
-    tokio::task::spawn(clone_repos(sync_lines, sync_directory.to_owned()));
+    let sync_lines_clone = sync_lines.clone();
+    thread::spawn(move ||{
+        clone_repos(sync_lines_clone, sync_directory.to_owned());
+    });
 }

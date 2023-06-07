@@ -13,25 +13,11 @@ use substring::Substring;
 ///     - timestamp (file if fingerprint is not present in data)
 ///     - fingerprint/
 ///       - timestamp (file)
-pub async fn save(path: String, ip: String, data: String) -> std::io::Result<()> {
+pub fn save(path: String, ip: String, data: String) -> std::io::Result<()> {
 
     let mut final_path = PathBuf::new();
     final_path.push(path.to_owned());
     final_path.push(ip.to_owned());
-
-    // create path if it does not exist
-    if let Ok(metadata) = fs::metadata(&path) {
-        if !metadata.is_dir() {
-            let _ = fs::create_dir_all(&path);
-        }
-    }
-
-    // create final_path if it does not exist
-    if let Ok(metadata) = fs::metadata(&final_path) {
-        if !metadata.is_dir() {
-            let _ = fs::create_dir_all(&final_path);
-        }
-    }
 
     if data.contains("fingerprint") {
 
@@ -42,19 +28,16 @@ pub async fn save(path: String, ip: String, data: String) -> std::io::Result<()>
         // get fingerprint in data
         let start = data.find("fingerprint\": \"").unwrap_or(0);
         let end = data.find("\",").unwrap_or(data.len());
-        let fingerprint = data.substring(start, end).split(": \"").last().unwrap();
+        let fingerprint = data.substring(start, end).split(": \"").last().unwrap().split("\"").take(1).last().unwrap();
+        // let fingerprint = data.substring(start, end).split(": \"").last().unwrap().split("\"").first().unwrap();
 
         file_path.push(fingerprint);
+        file_path.push(chrono::offset::Local::now().to_owned().format("%Y%m%d%H%M%S-%f").to_string());
 
-        // create fingerprint dir if it does not exist
-        if let Ok(metadata) = fs::metadata(&file_path) {
-            if !metadata.is_dir() {
-                let _ = fs::create_dir_all(&file_path);
-            }
-        }
+        // create parent directories
+        fs::create_dir_all(file_path.parent().unwrap()).unwrap();
 
-        // create file and save data into it
-        file_path.push(chrono::offset::Local::now().to_owned().to_rfc3339());
+        // create file with data
         let mut file = fs::File::create(file_path)?;
         file.write_all(data.as_bytes())?;
 
@@ -64,7 +47,12 @@ pub async fn save(path: String, ip: String, data: String) -> std::io::Result<()>
 
         let mut file_path = PathBuf::new();
         file_path.push(final_path.to_owned());
-        file_path.push(chrono::offset::Local::now().to_owned().to_rfc3339());
+        file_path.push(chrono::offset::Local::now().to_owned().format("%Y%m%d%H%M%S-%f").to_string());
+
+        // create parent directories
+        fs::create_dir_all(file_path.parent().unwrap()).unwrap();
+
+        // create file with data
         let mut file = fs::File::create(file_path)?;
         file.write_all(data.as_bytes())?;
 

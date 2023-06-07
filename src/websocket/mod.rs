@@ -4,6 +4,7 @@ pub mod data;
 
 use ws::{listen, CloseCode, Handler, Handshake, Message, Result, Sender};
 use std::sync::{Arc, Mutex};
+use std::thread;
 
 pub struct Server {
     connections: Arc<Mutex<Vec<connection::Connection>>>,
@@ -33,8 +34,11 @@ impl Handler for Server {
         // find the current IP
         for index in (0..connections.iter().len()).rev() {
             if connections[index].sender.connection_id() == self.server_sender.connection_id() {
+                let connection_ip_clone = connections[index].ip.clone();
                 // save message on file
-                tokio::spawn(data::save(path::connections(), connections[index].ip.clone(), message.clone().to_string()));
+                thread::spawn(move || {
+                    data::save(path::connections(), connection_ip_clone, message.clone().to_string())
+                });
                 break;
             }
         }
@@ -58,7 +62,7 @@ impl Handler for Server {
 }
 
 /// Open a websocket and manage every connection on the given list
-pub async fn open_ws(url: &str, port: &str, connections: Arc<Mutex<Vec<connection::Connection>>>) {
+pub fn open_ws(url: &str, port: &str, connections: Arc<Mutex<Vec<connection::Connection>>>) {
 
     listen(format!("{url}:{port}"), |sender| {
         Server {

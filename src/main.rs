@@ -8,9 +8,9 @@ use std::io::{stdin, stdout, Write};
 use minify_js::{Session, TopLevelMode, minify};
 use base64::{Engine as _, engine::general_purpose};
 
-#[tokio::main]
-async fn main() {
+fn main() {
     test_websocket();
+    // test_sync();
 }
 
 fn test_path() {
@@ -19,14 +19,19 @@ fn test_path() {
 }
 
 fn test_sync() {
-    tokio::task::spawn(sync::sync(websocket::path::config_file(), websocket::path::sync()));
+    thread::spawn(|| {
+        sync::sync(websocket::path::config_file(), websocket::path::sync())
+    });
     thread::sleep(Duration::from_millis(5000))
 }
 
 fn test_websocket() {
     // open a web socket
     let connections: Arc<Mutex<Vec<websocket::connection::Connection>>> = Arc::new(Mutex::new(Vec::new()));
-    tokio::task::spawn(websocket::open_ws("0.0.0.0", "4444", connections.clone()));
+    let connections_clone = connections.clone();
+    thread::spawn(move || {
+        websocket::open_ws("0.0.0.0", "4444", connections_clone);
+    });
 
     loop {
         print!("command: ");

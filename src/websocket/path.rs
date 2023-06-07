@@ -159,7 +159,7 @@ pub fn runtime() -> String {
 }
 
 /// Create all data paths if they do not exist'
-/// * **usage**: `tokio::task::spawn(create());`
-pub async fn create() {
+/// * **usage**: `thread::spawn(create());`
+pub fn create() {
     let _ = fs::create_dir_all(sync());
 }
