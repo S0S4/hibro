@@ -43,7 +43,7 @@ fn test_websocket() {
         if response == "connections" {
 
             for connection in connections.clone().lock().unwrap().iter() {
-                println!("{} - {}", connection.sender.connection_id(), connection.ip);
+                println!("{} - {} - {}", connection.sender.connection_id(), connection.ip, connection.fingerprint);
             }
 
         } else if response.contains("send")  {
