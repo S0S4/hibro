@@ -91,13 +91,23 @@ fn read_sync_lines(filename: &str) -> Vec<String> {
 }
 
 /// Sync repositories from the config file to the desired directory
-pub fn sync(config_file_path: String, sync_directory: String) {
+pub fn sync(config_file_path: String, sync_directory: String) -> std::io::Result<()> {
     let sync_lines: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(read_sync_lines(config_file_path.as_str())));
     for line in sync_lines.lock().unwrap().iter() {
         println!("{}", line.clone());
     }
     let sync_lines_clone = sync_lines.clone();
+
+    // Iterate over the files in the source directory
+    for entry in fs::read_dir(sync_directory.clone())? {
+        let entry = entry?;
+        let path = entry.path();
+        fs::remove_dir_all(&path)?;
+    }
+
     thread::spawn(move ||{
         clone_repos(sync_lines_clone, sync_directory.to_owned());
     });
+
+    Ok(())
 }
