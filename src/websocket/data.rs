@@ -42,21 +42,11 @@ pub fn save(path: String, ip: String, data: String, fingerprint: String) -> std:
 /// Move all files from one folder to another and remove the source directory
 pub fn move_files(source_dir: &str, dest_dir: &str) -> std::io::Result<()> {
 
-    println!("yes");
-
     // Create the destination directory if it doesn't exist
     fs::create_dir_all(dest_dir)?;
 
-    println!("yes");
-
-    let source_path = PathBuf::from(source_dir);
-
-    // let mut source_path = PathBuf::new();
-    // source_path.push(source_dir);
-
     // Iterate over the files in the source directory
-    for entry in fs::read_dir(source_path)? {
-        println!("yes");
+    for entry in fs::read_dir(source_dir)? {
         let entry = entry?;
         let path = entry.path();
 
@@ -66,6 +56,9 @@ pub fn move_files(source_dir: &str, dest_dir: &str) -> std::io::Result<()> {
             fs::copy(&path, &dest_path)?;
         }
     }
+
+    // remove source directory
+    fs::remove_dir_all(source_dir)?;
 
     Ok(())
 

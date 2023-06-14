@@ -54,19 +54,17 @@ impl Handler for Server {
 
                         let mut source_folder = PathBuf::new();
                         source_folder.push(path::connections());
+                        source_folder.push(connection_ip_clone.clone());
                         source_folder.push(fingerprint_clone);
 
                         let mut destination_folder = PathBuf::new();
                         destination_folder.push(path::connections());
+                        destination_folder.push(connection_ip_clone.clone());
                         destination_folder.push(new_fingerprint_clone);
 
-                        println!("{}", source_folder.to_str().unwrap());
-
                         thread::spawn(move || {
-                            // let _ = data::move_files(source_folder.to_str().unwrap(), destination_folder.to_str().unwrap());
-                            // println!("{}", Result::Expects(result));
                             if let Err(_err) = data::move_files(source_folder.to_str().unwrap(), destination_folder.to_str().unwrap()) {
-                                println!("Failed to perform necessary steps");
+                                println!("Failer to move data from old fingerprint folder");
                                 println!("{}", _err.to_string());
                             }
                         });
