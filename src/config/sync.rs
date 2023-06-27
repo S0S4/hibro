@@ -1,8 +1,5 @@
 use std::fs;
 use std::path::PathBuf;
-use std::sync::{Arc, Mutex};
-use std::fs::File;
-use std::io::{BufRead, BufReader};
 use std::thread;
 use git2::Repository;
 
@@ -56,10 +53,10 @@ fn clone_repo(url: String, dir_path: String) {
 ///
 ///   thread::spawn(|| {clone_repos(&urls, &target_dir)});
 ///   ```
-fn clone_repos(urls: Arc<Mutex<Vec<String>>>, dir_path: String) {
+fn clone_repos(urls: Vec<String>, dir_path: String) {
     println!("cloning repos...");
     let mut handles = Vec::new();
-    for url in urls.lock().unwrap().iter() {
+    for url in urls.iter() {
         println!("trying to clone... {}", &url);
         let url_clone = url.clone();
         let dir_path_clone = dir_path.to_owned().clone();
@@ -73,40 +70,22 @@ fn clone_repos(urls: Arc<Mutex<Vec<String>>>, dir_path: String) {
     }
 }
 
-/// Read lines from the given file and return the ones that starts with `sync=` without that part
-fn read_sync_lines(filename: &str) -> Vec<String> {
-    let file = File::open(filename).unwrap();
-    let reader = BufReader::new(file);
-    let mut sync_lines = Vec::new();
-
-    for line in reader.lines() {
-        if let Ok(line) = line {
-            if line.starts_with("sync=") {
-                sync_lines.push(line["sync=".len()..].to_string());
-            }
-        }
-    }
-
-    return sync_lines
-}
-
 /// Sync repositories from the config file to the desired directory
-pub fn sync(config_file_path: String, sync_directory: String) -> std::io::Result<()> {
-    let sync_lines: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(read_sync_lines(config_file_path.as_str())));
-    for line in sync_lines.lock().unwrap().iter() {
+pub fn sync(repos: Vec<String>, sync_dir_path: String) -> std::io::Result<()> {
+    for line in repos.iter() {
         println!("{}", line.clone());
     }
-    let sync_lines_clone = sync_lines.clone();
+    let sync_lines_clone = repos.clone();
 
     // Iterate over the files in the source directory
-    for entry in fs::read_dir(sync_directory.clone())? {
+    for entry in fs::read_dir(sync_dir_path.clone())? {
         let entry = entry?;
         let path = entry.path();
         fs::remove_dir_all(&path)?;
     }
 
     thread::spawn(move ||{
-        clone_repos(sync_lines_clone, sync_directory.to_owned());
+        clone_repos(sync_lines_clone, sync_dir_path.to_owned());
     });
 
     Ok(())

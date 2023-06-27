@@ -1,5 +1,4 @@
 pub mod connection;
-pub mod path;
 pub mod data;
 
 use ws::{listen, CloseCode, Handler, Handshake, Message, Result, Sender};
@@ -8,8 +7,9 @@ use std::thread;
 use std::path::PathBuf;
 use substring::Substring;
 use rand::Rng;
+use crate::path;
 
-pub struct Server {
+struct Server {
     connections: Arc<Mutex<Vec<connection::Connection>>>,
     server_sender: Sender,
 }
@@ -53,12 +53,12 @@ impl Handler for Server {
                         let new_fingerprint_clone = new_fingerprint.clone();
 
                         let mut source_folder = PathBuf::new();
-                        source_folder.push(path::connections());
+                        source_folder.push(path::connections_dir());
                         source_folder.push(connection_ip_clone.clone());
                         source_folder.push(fingerprint_clone);
 
                         let mut destination_folder = PathBuf::new();
-                        destination_folder.push(path::connections());
+                        destination_folder.push(path::connections_dir());
                         destination_folder.push(connection_ip_clone.clone());
                         destination_folder.push(new_fingerprint_clone);
 
@@ -78,7 +78,7 @@ impl Handler for Server {
 
                 // save message on file
                 thread::spawn(move || {
-                    data::save(path::connections(), connection_ip_clone, message_clone, fingerprint_clone)
+                    data::save(path::connections_dir(), connection_ip_clone, message_clone, fingerprint_clone)
                 });
                 break;
             }

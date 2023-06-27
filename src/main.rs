@@ -1,5 +1,6 @@
 mod websocket;
-mod sync;
+mod config;
+mod path;
 
 use std::thread;
 use core::time::Duration;
@@ -9,19 +10,11 @@ use minify_js::{Session, TopLevelMode, minify};
 use base64::{Engine as _, engine::general_purpose};
 
 fn main() {
-    test_websocket();
-    // test_sync();
-}
-
-fn test_path() {
-    println!("{}", websocket::path::config_file());
-    println!("{}", websocket::path::sync());
+    // test_websocket();
 }
 
 fn test_sync() {
-    thread::spawn(|| {
-        sync::sync(websocket::path::config_file(), websocket::path::sync())
-    });
+    config::sync_plugins();
     thread::sleep(Duration::from_millis(5000))
 }
 
