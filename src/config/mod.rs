@@ -26,7 +26,7 @@ fn read_lines(file_path: String) -> Vec<String> {
 
 }
 
-pub fn blacklist(refresh: bool) -> Mutex<Vec<String>> {
+pub fn blacklist(refresh: bool) -> Vec<String> {
 
     if refresh {
         let mut lines: Vec<String> = read_lines(path::blacklist_file());
@@ -35,22 +35,20 @@ pub fn blacklist(refresh: bool) -> Mutex<Vec<String>> {
         lock.append(&mut lines);
     }
 
-    return BLACKLIST.lock().unwrap();
+    return BLACKLIST.lock().unwrap().to_vec();
 
 }
 
-pub fn whitelist(refresh: bool) -> Arc<Mutex<Vec<String>>> {
+pub fn whitelist(refresh: bool) -> Vec<String> {
 
     if refresh {
-        let lines: Vec<String> = read_lines(path::blacklist_file());
-        // check how to change vector capacity
-        WHITELIST.clone().lock().unwrap().clear();
-        for line in lines {
-            WHITELIST.clone().lock().unwrap().push(line);
-        }
+        let mut lines: Vec<String> = read_lines(path::blacklist_file());
+        let mut lock = WHITELIST.lock().unwrap();
+        lock.clear();
+        lock.append(&mut lines);
     }
 
-    return WHITELIST.clone();
+    return WHITELIST.lock().unwrap().to_vec();
 
 }
 
