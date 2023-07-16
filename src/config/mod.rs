@@ -11,7 +11,6 @@ static BLACKLIST: Lazy<Mutex<Vec<String>>> = Lazy::new(|| {
     bl
 });
 
-
 static WHITELIST: Lazy<Arc<Mutex<Vec<String>>>> = Lazy::new(|| {
     let wl = Arc::new(Mutex::new(read_lines(path::whitelist_file())));
     wl
@@ -42,7 +41,7 @@ pub fn blacklist(refresh: bool) -> Vec<String> {
 pub fn whitelist(refresh: bool) -> Vec<String> {
 
     if refresh {
-        let mut lines: Vec<String> = read_lines(path::blacklist_file());
+        let mut lines: Vec<String> = read_lines(path::whitelist_file());
         let mut lock = WHITELIST.lock().unwrap();
         lock.clear();
         lock.append(&mut lines);
