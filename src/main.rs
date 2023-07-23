@@ -1,6 +1,7 @@
 mod websocket;
-mod config;
+pub mod config;
 mod path;
+mod data;
 
 use std::thread;
 use core::time::Duration;
@@ -8,9 +9,48 @@ use std::sync::{Arc, Mutex};
 use std::io::{stdin, stdout, Write};
 use minify_js::{Session, TopLevelMode, minify};
 use base64::{Engine as _, engine::general_purpose};
+// use clap::{Command, Arg, crate_version, crate_authors, crate_description };
+use clap::Parser;
+
+
+/// C2 for web browsers
+#[derive(Parser, Debug)]
+#[command(author, version, about, long_about = None)]
+struct Args {
+    /// Start tui
+    #[arg(short, long)]
+    ui: bool,
+
+    /// Do not save any data at disk
+    #[arg(short, long, default_value_t = False)]
+    memfilesys: bool,
+}
+
+fn argparser() {
+
+    let args = Args::parse();
+
+    let ui: _ = args.ui;
+    let memfilesys = args.memfilesys;
+
+    println!("ui {}", ui);
+    println!("memfilesys {}", memfilesys);
+}
 
 fn main() {
+    argparser();
+    // let args: Vec<String> = std::env::args().collect();    let args: Vec<String> = std::env::args().collect();
+    //
+    // for arg in args {
+    //     println!("Argument: {}", arg);
+    // }
+
     // test_websocket();
+    // for item in config::whitelist(true) {
+    //     println!("{}", item);
+    // }
+    // test_websocket();
+
 }
 
 fn test_sync() {

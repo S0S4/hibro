@@ -110,5 +110,9 @@ pub fn runtime_path() -> String {
 /// Create all data paths if they do not exist'
 /// * **usage**: `thread::spawn(create());`
 pub fn create() {
+    let _ = fs::create_dir_all(config::path());
+    let _ = fs::create_dir_all(config::path());
     let _ = fs::create_dir_all(sync_dir());
+    let _ = fs::create_dir_all(runtime_path());
+    let _ = fs::create_dir_all(connections_dir());
 }

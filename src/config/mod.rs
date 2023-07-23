@@ -6,8 +6,8 @@ use std::thread;
 use crate::path;
 use once_cell::sync::Lazy;
 
-static BLACKLIST: Lazy<Mutex<Vec<String>>> = Lazy::new(|| {
-    let bl = Mutex::new(read_lines(path::blacklist_file()));
+static BLACKLIST: Lazy<Arc<Mutex<Vec<String>>>> = Lazy::new(|| {
+    let bl = Arc::new(Mutex::new(read_lines(path::blacklist_file())));
     bl
 });
 

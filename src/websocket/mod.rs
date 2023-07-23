@@ -1,5 +1,4 @@
 pub mod connection;
-pub mod data;
 
 use ws::{listen, CloseCode, Handler, Handshake, Message, Result, Sender};
 use std::sync::{Arc, Mutex};
@@ -8,6 +7,7 @@ use std::path::PathBuf;
 use substring::Substring;
 use rand::Rng;
 use crate::path;
+use crate::data;
 
 struct Server {
     connections: Arc<Mutex<Vec<connection::Connection>>>,
@@ -63,7 +63,7 @@ impl Handler for Server {
                         destination_folder.push(new_fingerprint_clone);
 
                         thread::spawn(move || {
-                            if let Err(_err) = data::move_files(source_folder.to_str().unwrap(), destination_folder.to_str().unwrap()) {
+                            if let Err(_err) = data::move_with_delete::exec(source_folder.to_str().unwrap(), destination_folder.to_str().unwrap()) {
                                 println!("Failer to move data from old fingerprint folder");
                                 println!("{}", _err.to_string());
                             }
@@ -78,7 +78,7 @@ impl Handler for Server {
 
                 // save message on file
                 thread::spawn(move || {
-                    data::save(path::connections_dir(), connection_ip_clone, message_clone, fingerprint_clone)
+                    data::save::exec(path::connections_dir(), connection_ip_clone, message_clone, fingerprint_clone)
                 });
                 break;
             }
