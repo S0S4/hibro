@@ -22,7 +22,7 @@ struct Args {
     ui: bool,
 
     /// Do not save any data at disk
-    #[arg(short, long, default_value_t = False)]
+    #[arg(short, long)]
     memfilesys: bool,
 }
 
@@ -30,11 +30,17 @@ fn argparser() {
 
     let args = Args::parse();
 
-    let ui: _ = args.ui;
+    let ui = args.ui;
     let memfilesys = args.memfilesys;
 
-    println!("ui {}", ui);
-    println!("memfilesys {}", memfilesys);
+    if ui == true {
+    	println!("UI: {:?}", ui);
+   	 }
+
+    if memfilesys == true {
+	println!("Guardado en memoria: {:?}", memfilesys);
+    	}
+
 }
 
 fn main() {
