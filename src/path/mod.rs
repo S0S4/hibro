@@ -2,8 +2,7 @@ mod home;
 mod config;
 mod data;
 
-use std::fs;
-use std::env;
+use std::{fs,env};
 use std::path::PathBuf;
 
 /// Return blacklist file path
@@ -115,4 +114,8 @@ pub fn create() {
     let _ = fs::create_dir_all(sync_dir());
     let _ = fs::create_dir_all(runtime_path());
     let _ = fs::create_dir_all(connections_dir());
+    let _ = fs::OpenOptions::new().create_new(true).write(true).open(whitelist_file());
+    let _ = fs::OpenOptions::new().create_new(true).write(true).open(blacklist_file());
+    let _ = fs::OpenOptions::new().create_new(true).write(true).open(sync_file());
 }
+
