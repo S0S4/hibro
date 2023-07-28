@@ -2,7 +2,6 @@ mod websocket;
 pub mod config;
 mod path;
 mod data;
-
 use std::thread;
 use core::time::Duration;
 use std::sync::{Arc, Mutex};
@@ -46,7 +45,7 @@ fn argparser() {
 
 fn main() {
     argparser();
-    // let args Vec<String> = std::env::args().collect();    let args: Vec<String> = std::env::args().collect();
+    // let args: Vec<String> = std::env::args().collect();    let args: Vec<String> = std::env::args().collect();
     //
     // for arg in args {
     //     println!("Argument: {}", arg);
