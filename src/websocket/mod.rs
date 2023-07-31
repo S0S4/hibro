@@ -6,9 +6,10 @@ use substring::Substring;
 use rand::Rng;
 use crate::path;
 use crate::data;
+use crate::model;
 
 struct Server {
-    connections: Arc<Mutex<Vec<data::connection::Connection>>>,
+    connections: Arc<Mutex<Vec<model::connection::Connection>>>,
     server_sender: Sender,
 }
 
@@ -19,7 +20,7 @@ impl Handler for Server {
         let mut rng = rand::thread_rng();
         let random_number = rng.gen_range(100000000..=999999999);
 
-        self.connections.lock().unwrap().push(data::connection::Connection{
+        self.connections.lock().unwrap().push(model::connection::Connection{
             ip: Some(handshake.remote_addr()?).unwrap().unwrap(),
             sender: Option::from(self.server_sender.clone()),
             fingerprint: random_number.to_string()
@@ -101,7 +102,7 @@ impl Handler for Server {
 }
 
 /// Open a websocket and manage every connection on the given list
-pub fn open_ws(url: &str, port: &str, connections: Arc<Mutex<Vec<data::connection::Connection>>>) {
+pub fn open_ws(url: &str, port: &str, connections: Arc<Mutex<Vec<model::connection::Connection>>>) {
 
     listen(format!("{url}:{port}"), |sender| {
         Server {

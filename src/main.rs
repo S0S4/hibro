@@ -1,16 +1,17 @@
 mod api;
 mod data;
+mod model;
 mod path;
 mod websocket;
-pub mod config;
+mod config;
 
-use std::thread;
-use core::time::Duration;
-use std::sync::{Arc, Mutex};
-use std::io::{stdin, stdout, Write};
-//use hibro::path::create;
 // use clap::{Command, Arg, crate_version, crate_authors, crate_description };
+//use hibro::path::create;
 use clap::Parser;
+use core::time::Duration;
+use std::io::{stdin, stdout, Write};
+use std::sync::{Arc, Mutex};
+use std::thread;
 
 /// C2 for web browsers
 #[derive(Parser, Debug)]
@@ -43,6 +44,7 @@ fn argparser() {
 }
 
 fn main() {
+
     argparser();
     // let args: Vec<String> = std::env::args().collect();    let args: Vec<String> = std::env::args().collect();
     //
@@ -63,8 +65,9 @@ fn test_sync() {
 }
 
 fn test_websocket() {
+
     // open a web socket
-    let connections: Arc<Mutex<Vec<data::connection::Connection>>> = Arc::new(Mutex::new(Vec::new()));
+    let connections: Arc<Mutex<Vec<model::connection::Connection>>> = Arc::new(Mutex::new(Vec::new()));
     let connections_clone = connections.clone();
     thread::spawn(move || {
         websocket::open_ws("0.0.0.0", "4444", connections_clone);
