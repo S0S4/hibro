@@ -3,15 +3,17 @@ mod data;
 mod model;
 mod path;
 mod websocket;
-mod config;
+mod tcp;
+pub mod config;
 
+use std::thread;
+use crate::tcp::tcp_socket;
+use core::time::Duration;
+use std::sync::{Arc, Mutex};
+use std::io::{stdin, stdout, Write};
 // use clap::{Command, Arg, crate_version, crate_authors, crate_description };
 //use hibro::path::create;
 use clap::Parser;
-use core::time::Duration;
-use std::io::{stdin, stdout, Write};
-use std::sync::{Arc, Mutex};
-use std::thread;
 
 /// C2 for web browsers
 #[derive(Parser, Debug)]
