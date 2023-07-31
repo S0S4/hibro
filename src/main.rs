@@ -2,9 +2,11 @@ mod api;
 mod data;
 mod path;
 mod websocket;
+mod tcp;
 pub mod config;
 
 use std::thread;
+use crate::tcp::tcp_socket;
 use core::time::Duration;
 use std::sync::{Arc, Mutex};
 use std::io::{stdin, stdout, Write};
@@ -44,6 +46,7 @@ fn argparser() {
 
 fn main() {
     argparser();
+    tcp_socket();
     // let args: Vec<String> = std::env::args().collect();    let args: Vec<String> = std::env::args().collect();
     //
     // for arg in args {
