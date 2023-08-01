@@ -1,8 +1,7 @@
-mod websocket;
-mod tcp;
 pub mod config;
 mod path;
 mod data;
+mod connections;
 use std::thread;
 use crate::tcp::tcp_socket;
 use core::time::Duration;
@@ -46,8 +45,9 @@ fn argparser() {
 }
 
 fn main() {
+
     argparser();
-    tcp_socket();
+    openudp();
     // let args: Vec<String> = std::env::args().collect();    let args: Vec<String> = std::env::args().collect();
     //
     // for arg in args {
