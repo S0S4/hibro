@@ -1,5 +1,3 @@
-pub mod Connection;
-
 use ws::{listen, CloseCode, Handler, Handshake, Message, Result, Sender};
 use std::sync::{Arc, Mutex};
 use std::thread;
@@ -8,9 +6,10 @@ use substring::Substring;
 use rand::Rng;
 use crate::path;
 use crate::data;
+use crate::model;
 
 struct Server {
-    connections: Arc<Mutex<Vec<connection::Connection>>>,
+    connections: Arc<Mutex<Vec<model::connection::Connection>>>,
     server_sender: Sender,
 }
 
@@ -21,9 +20,9 @@ impl Handler for Server {
         let mut rng = rand::thread_rng();
         let random_number = rng.gen_range(100000000..=999999999);
 
-        self.connections.lock().unwrap().push(connection::Connection{
+        self.connections.lock().unwrap().push(model::connection::Connection{
             ip: Some(handshake.remote_addr()?).unwrap().unwrap(),
-            sender: self.server_sender.clone(),
+            sender: Option::from(self.server_sender.clone()),
             fingerprint: random_number.to_string()
         });
 
@@ -38,7 +37,7 @@ impl Handler for Server {
 
         // find the current IP
         for index in (0..connections.iter().len()).rev() {
-            if connections[index].sender.connection_id() == self.server_sender.connection_id() {
+            if connections[index].sender.clone().unwrap().connection_id() == self.server_sender.connection_id() {
 
                 let connection_ip_clone = connections[index].ip.clone();
                 let message_clone = message.clone().to_string();
@@ -93,7 +92,7 @@ impl Handler for Server {
         let mut connections = self.connections.lock().unwrap();
 
         for index in (0..connections.iter().len()).rev() {
-            if connections[index].sender.connection_id() == self.server_sender.connection_id() {
+            if connections[index].sender.clone().unwrap().connection_id() == self.server_sender.connection_id() {
                 connections.remove(index);
                 println!("WebSocket connection closed with code {:?} reason '{}', id {}", code, reason, index);
             }
@@ -103,7 +102,7 @@ impl Handler for Server {
 }
 
 /// Open a websocket and manage every connection on the given list
-pub fn open_ws(url: &str, port: &str, connections: Arc<Mutex<Vec<connection::Connection>>>) {
+pub fn open_ws(url: &str, port: &str, connections: Arc<Mutex<Vec<model::connection::Connection>>>) {
 
     listen(format!("{url}:{port}"), |sender| {
         Server {
